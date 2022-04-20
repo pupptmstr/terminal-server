@@ -22,21 +22,6 @@ class AuthRepo {
             null
         }
     }
-//    {
-//        DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//            val ps = connection!!.prepareStatement("SELECT * FROM users WHERE (LOGIN=? AND PASSWORD=?);").apply {
-//                setString(1, login)
-//                setString(2, password)
-//            }
-//            val resSet = ps.executeQuery()
-//            return if (resSet.next()) {
-//                val role = resSet.getString("role")
-//                AuthModel(login, "", role)
-//            } else
-//                null
-//
-//        }
-//    }
 
     suspend fun signUp(login: String, password: String, role: String): Boolean = dbQuery {
         try {
@@ -51,23 +36,6 @@ class AuthRepo {
             false
         }
     }
-//    {
-//        DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//            return try {
-//                val ps =
-//                    connection!!.prepareStatement("INSERT INTO users(LOGIN, PASSWORD, ROLE) VALUES (?, ?, ?);").apply {
-//                        setString(1, login)
-//                        setString(2, password)
-//                        setString(3, role)
-//                    }
-//                ps.execute()
-//                true
-//            } catch (e: Exception) {
-//                println("Some problems with registration new user $login")
-//                false
-//            }
-//        }
-//    }
 }
 
 fun toAuthModel(row: ResultRow): AuthModel =

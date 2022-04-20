@@ -44,37 +44,10 @@ suspend fun isClientLogin(login: String): Boolean = dbQuery {
     ).mapNotNull { toAuthModel(it) }.singleOrNull()
     res != null
 }
-//{
-//    DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-//        val instantMinusHour = Instant.now().minusMillis(3600000)
-//        val timestampMinusHour = Timestamp.from(instantMinusHour)
-//        val ps = connection!!.prepareStatement(
-//            "SELECT * FROM users WHERE (LOGIN=? AND is_active=true AND (active_last, active_last) OVERLAPS (?, INTERVAL '1 hour'));"
-//        ).apply {
-//            setString(1, login)
-//            setTimestamp(2, timestampMinusHour, tzUTC)
-//        }
-//
-//        val resSet =
-//            ps.executeQuery()
-//        return resSet.next()
-//    }
-//}
 
 suspend fun updateUserLastActive(login: String) = dbQuery {
     Users.update({Users.login eq login}) { it[activeLast] = timestampParam(Instant.now()) }
 }
-//{
-//    DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-//        val instant = Instant.now()
-//        val timestampNow = Timestamp.from(instant)
-//        val ps = connection!!.prepareStatement("UPDATE users SET active_last=? WHERE LOGIN='$login';")
-//        ps.setTimestamp(1, timestampNow, tzUTC)
-//        ps.execute()
-//    }
-//}
 
 suspend fun getActiveUsers(): List<String> = dbQuery {
     val instantMinusHour = Instant.now().minusMillis(3600000)
@@ -89,47 +62,11 @@ suspend fun getActiveUsers(): List<String> = dbQuery {
     }
     res
 }
-//{
-//    DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-//        val instantMinusHour = Instant.now().minusMillis(3600000)
-//        val timestampMinusHour = Timestamp.from(instantMinusHour)
-//        val ps = connection!!.prepareStatement(
-//            "SELECT * FROM users WHERE (is_active=true AND (active_last, active_last) OVERLAPS (?, INTERVAL '1 hour'));"
-//        ).apply {
-//            setTimestamp(1, timestampMinusHour, tzUTC)
-//        }
-//
-//        val resSet =
-//            ps.executeQuery()
-//        val res = mutableListOf<String>()
-//        while (resSet.next()) {
-//            res.add(resSet.getString("login"))
-//        }
-//        return res
-//    }
-//}
 
 suspend fun killUser(userName: String) = dbQuery {
     Users.update({Users.login eq userName}) { it[isActive] = false }
 }
-//{
-//    DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//        val ps = connection!!.prepareStatement("UPDATE users SET is_active=false WHERE LOGIN=?;").apply {
-//            setString(1, userName)
-//        }
-//        ps.execute()
-//    }
-//}
 
 suspend fun activateUser(userName: String)= dbQuery {
     Users.update({Users.login eq userName}) { it[isActive] = true }
 }
-//{
-//    DbConnection().getConnection(dbName, dbUsername, dbPassword).use { connection ->
-//        val statement = connection!!.prepareStatement("UPDATE users SET is_active=true WHERE LOGIN=?;").apply {
-//            setString(1, userName)
-//        }
-//        statement.execute()
-//    }
-//}

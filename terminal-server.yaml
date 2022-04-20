@@ -1,0 +1,233 @@
+openapi: 3.0.3
+info:
+  title: Rest terminal
+  description: Rest terminal, where u can ls and so on
+  version: 1.0.0
+servers:
+  - url: 'https://ls-terminal.duckdns.org'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http\https
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized:
+      description: Your session was destroyed
+    Forbidden:
+      description: No token provided, please signIn
+    NotEnoughRights:
+      description: You have not enough rights
+paths:
+  /api/v1/auth/signin:
+    post:
+      description: Sign in to system and get your JWT key
+      requestBody:
+        content:
+          application/json:
+            schema: # Request body contents
+              type: object
+              properties:
+                Login:
+                  type: string
+                Password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: object
+                    properties:
+                      JWT:
+                        type: string
+                      Location:
+                        type: string
+        '400':
+          description: Bad request, bad credentials
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: string
+  /api/v1/auth/signup:
+    post:
+      description: Sign up in system, after success you need to sign in to get key
+      requestBody:
+        content:
+          application/json:
+            schema: # Request body contents
+              type: object
+              properties:
+                Login:
+                  type: string
+                Password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /api/v1/terminal/ls:
+    post:
+      security:
+        - bearerAuth: [ ]
+      description: LS some location, works like in terminal (from your current location, or globally)
+      requestBody:
+        content:
+          application/json:
+            schema: # Request body contents
+              type: object
+              properties:
+                BasePath: # Your current location
+                  type: string
+                Location: # Location to ls
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: object
+                    additionalProperties:
+                      type: boolean #True if directory, false if file
+        '400':
+          description: Bad request, Wrong path to ls
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/terminal/cd:
+    post:
+      security:
+        - bearerAuth: [ ]
+      description: Change current location
+      requestBody:
+        content:
+          application/json:
+            schema: # Request body contents
+              type: object
+              properties:
+                BasePath: # Your current location
+                  type: string
+                Location: # Location to ls
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: string # Your new location, remember it, pass me as BaseLocation argument
+        '400':
+          description: Bad request, wrong path to cd
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/terminal/who:
+    get:
+      security:
+        - bearerAuth: [ ]
+      description: Get all currently signed in users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Response body contents
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/terminal/logout:
+    get:
+      security:
+        - bearerAuth: [ ]
+      description: Quit and close your session
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/terminal/kill:
+    post:
+      security:
+        - bearerAuth: [ ]
+      description: Closes someone's session
+      requestBody:
+        content:
+          application/json:
+            schema: # Request body contents
+              type: object
+              properties:
+                UserToKill: # Username of user which admin need to close session
+                  type: string
+      responses:
+        '200':
+          description: OK, user killed
+          content:
+            application/json:
+              schema: # Response body contents
+                type: object
+                properties:
+                  Status:
+                    type: string
+                  Message:
+                    type: object
+                    additionalProperties:
+                      type: boolean #True if directory, false if file
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          #$ref: '#/components/responses/NotEnoughRights'
